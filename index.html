@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flashlight App</title>
+  <link rel="manifest" href="manifest.json">
   <style>
     body, html {
       margin: 0;
@@ -14,7 +15,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: white;
+      background-color: rgb(255, 224, 189); /* Initial warm color */
       transition: background-color 0.2s, opacity 0.2s;
     }
     .slider-container {
@@ -32,12 +33,19 @@
       flex: 3;
     }
   </style>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(error => console.error('Service Worker Registration Failed:', error));
+    }
+  </script>
 </head>
 <body>
   <h1>Flashlight App</h1>
   <div class="slider-container">
     <label for="warmth">Warmth:</label>
-    <input id="warmth" type="range" min="2000" max="8000" value="4000">
+    <input id="warmth" type="range" min="0" max="100" value="50">
   </div>
   <div class="slider-container">
     <label for="brightness">Brightness:</label>
@@ -48,16 +56,20 @@
     const warmthSlider = document.getElementById('warmth');
     const brightnessSlider = document.getElementById('brightness');
 
-    // Function to update warmth
+    // Function to update warmth (changing from pale yellow to deep orange)
     warmthSlider.addEventListener('input', () => {
       const warmthValue = warmthSlider.value;
-      document.body.style.backgroundColor = `rgb(${warmthValue / 40}, ${warmthValue / 40}, 255)`;
+      // Convert slider value to RGB values for warm hues (yellow to orange)
+      const red = 255;
+      const green = 224 - (warmthValue * 1.5); // Green decreases with warmth
+      const blue = 189 - (warmthValue * 1.89); // Blue decreases more sharply with warmth
+      document.body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
     });
 
-    // Function to update brightness
+    // Function to update brightness (opacity)
     brightnessSlider.addEventListener('input', () => {
       const brightnessValue = brightnessSlider.value;
-      document.body.style.opacity = brightnessValue;
+      document.body.style.opacity = brightnessValue; // Increase brightness to the right
     });
   </script>
   <link rel="manifest" href="manifest.json">
