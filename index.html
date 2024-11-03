@@ -54,14 +54,24 @@
     let columnX = canvas.width;
     let columnHeight = Math.floor(Math.random() * (canvas.height - columnGap));
 
-    // Event Listener for Flap
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space" && !gameOver) {
+    // Function to handle bird flap
+    function flap() {
+      if (!gameOver) {
         birdVelocity = flapStrength;
-      } else if (e.code === "Space" && gameOver) {
+      } else {
         resetGame();
       }
+    }
+
+    // Event Listener for Flap using Spacebar
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        flap();
+      }
     });
+
+    // Event Listener for Tap on the Canvas
+    canvas.addEventListener("click", flap);
 
     // Game Loop
     function gameLoop() {
@@ -106,7 +116,7 @@
         ctx.font = "30px Arial";
         ctx.fillText("Game Over!", canvas.width / 2 - 70, canvas.height / 2 - 20);
         ctx.font = "20px Arial";
-        ctx.fillText("Press Space to Restart", canvas.width / 2 - 90, canvas.height / 2 + 20);
+        ctx.fillText("Press Space or Tap to Restart", canvas.width / 2 - 130, canvas.height / 2 + 20);
       }
     }
 
