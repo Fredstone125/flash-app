@@ -15,7 +15,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: rgb(255, 244, 229); /* Initial warm color */
+      background-color: rgb(255, 230, 0); /* Initial warm yellow color */
       transition: background-color 0.2s, opacity 0.2s;
     }
     .slider-container {
@@ -57,13 +57,13 @@
     const warmthSlider = document.getElementById('warmth');
     const brightnessSlider = document.getElementById('brightness');
 
-    // Function to update warmth (shifting from pale to deep orange hues)
+    // Function to update warmth (shifting from pale yellow to deep orange)
     warmthSlider.addEventListener('input', () => {
       const warmthValue = warmthSlider.value;
-      // Adjusting warmth from pale yellow to orange
+      // Adjust red and green values for a warm yellow to orange transition
       const red = 255;
-      const green = 244 - (warmthValue * 1.5); // Green decreases with warmth
-      const blue = 229 - (warmthValue * 2);     // Blue decreases more with warmth
+      const green = 230 - (warmthValue * 1.2); // Gradually decrease green for more warmth
+      const blue = 0; // Blue remains at 0 for a pure warm tone
       document.body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
     });
 
