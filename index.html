@@ -15,7 +15,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: rgb(255, 224, 189); /* Initial warm color */
+      background-color: rgb(255, 244, 229); /* Initial warm color */
       transition: background-color 0.2s, opacity 0.2s;
     }
     .slider-container {
@@ -34,6 +34,7 @@
     }
   </style>
   <script>
+    // Register the service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js')
         .then(() => console.log('Service Worker Registered'))
@@ -56,29 +57,21 @@
     const warmthSlider = document.getElementById('warmth');
     const brightnessSlider = document.getElementById('brightness');
 
-    // Function to update warmth (changing from pale yellow to deep orange)
+    // Function to update warmth (shifting from pale to deep orange hues)
     warmthSlider.addEventListener('input', () => {
       const warmthValue = warmthSlider.value;
-      // Convert slider value to RGB values for warm hues (yellow to orange)
+      // Adjusting warmth from pale yellow to orange
       const red = 255;
-      const green = 224 - (warmthValue * 1.5); // Green decreases with warmth
-      const blue = 189 - (warmthValue * 1.89); // Blue decreases more sharply with warmth
+      const green = 244 - (warmthValue * 1.5); // Green decreases with warmth
+      const blue = 229 - (warmthValue * 2);     // Blue decreases more with warmth
       document.body.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
     });
 
-    // Function to update brightness (opacity)
+    // Function to update brightness (increasing opacity to the right)
     brightnessSlider.addEventListener('input', () => {
       const brightnessValue = brightnessSlider.value;
-      document.body.style.opacity = brightnessValue; // Increase brightness to the right
+      document.body.style.opacity = brightnessValue; // Brighter as slider moves right
     });
-  </script>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('Service Worker Registered'))
-        .catch(error => console.error('Service Worker Registration Failed:', error));
-    }
   </script>
 </body>
 </html>
