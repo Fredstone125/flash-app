@@ -70,8 +70,11 @@
       }
     });
 
-    // Event Listener for Tap on the Canvas
-    canvas.addEventListener("click", flap);
+    // Event Listener for Tap on the Canvas (Instantaneous)
+    canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // Prevent scrolling on mobile devices
+      flap();
+    });
 
     // Game Loop
     function gameLoop() {
