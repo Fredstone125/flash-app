@@ -1,10 +1,10 @@
 {
-  "name": "Flappy Bird Game",
-  "short_name": "Flappy",
-  "description": "A simple Flappy Bird-style game.",
-  "start_url": "/index.html",
+  "name": "Tic Tac Toe",
+  "short_name": "TicTacToe",
+  "description": "A simple Tic Tac Toe game where you play against the computer.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#87CEEB",
-  "theme_color": "#70c5ce",
+  "theme_color": "#87CEEB",
   "orientation": "portrait"
 }
