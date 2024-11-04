@@ -1,10 +1,10 @@
 {
-  "name": "Tic Tac Toe",
-  "short_name": "TicTacToe",
-  "description": "A simple Tic Tac Toe game where you play against the computer.",
+  "name": "Reaction Time Tester",
+  "short_name": "ReactionTester",
+  "description": "Test your reaction speed and see how fast you can click!",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#87CEEB",
   "theme_color": "#87CEEB",
-  "orientation": "portrait"
+  "orientation": "portrait-primary"
 }
