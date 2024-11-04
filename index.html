@@ -3,24 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flappy Bird Game</title>
+  <title>Tic Tac Toe</title>
   <link rel="manifest" href="manifest.json">
   <style>
     body, html {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
+      height: 100%;
+      margin: 0;
+      font-family: Arial, sans-serif;
       background-color: #87CEEB;
     }
-    #gameCanvas {
-      background-color: #70c5ce;
-      display: block;
-      border: 2px solid #000;
+    #gameContainer {
+      text-align: center;
+    }
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 5px;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #ffffff;
+      border: 2px solid #333;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 1.2em;
     }
   </style>
   <script>
@@ -33,109 +49,94 @@
   </script>
 </head>
 <body>
-  <canvas id="gameCanvas" width="320" height="480"></canvas>
+  <div id="gameContainer">
+    <h1>Tic Tac Toe</h1>
+    <div id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+    <div id="status">Your turn!</div>
+  </div>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    const board = Array(9).fill(null); // Game board state
+    let isGameOver = false;
+    const player = 'X';
+    const computer = 'O';
+    
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+      [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
 
-    // Game Variables
-    let birdY = canvas.height / 2;
-    let birdVelocity = 0;
-    const gravity = 0.6;
-    const flapStrength = -10;
-    const birdSize = 20;
-    let score = 0;
-    let gameOver = false;
-
-    // Column Variables
-    const columnWidth = 50;
-    const columnGap = 150;
-    let columnX = canvas.width;
-    let columnHeight = Math.floor(Math.random() * (canvas.height - columnGap));
-
-    // Function to handle bird flap
-    function flap() {
-      if (!gameOver) {
-        birdVelocity = flapStrength;
-      } else {
-        resetGame();
+    // Function to handle user move
+    function makeMove(index, symbol) {
+      if (!board[index] && !isGameOver) {
+        board[index] = symbol;
+        document.querySelector(`.cell[data-index="${index}"]`).textContent = symbol;
+        checkGameOver(symbol);
       }
     }
 
-    // Event Listener for Flap using Spacebar
-    document.addEventListener("keydown", (e) => {
-      if (e.code === "Space") {
-        flap();
-      }
+    // Handle user click
+    document.querySelectorAll('.cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const index = cell.getAttribute('data-index');
+        if (!board[index] && !isGameOver) {
+          makeMove(index, player);
+          if (!isGameOver) computerMove();
+        }
+      });
     });
 
-    // Event Listener for Tap on the Canvas (Instantaneous)
-    canvas.addEventListener("touchstart", (e) => {
-      e.preventDefault(); // Prevent scrolling on mobile devices
-      flap();
-    });
-
-    // Game Loop
-    function gameLoop() {
-      if (!gameOver) {
-        // Clear Canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw Bird
-        birdVelocity += gravity;
-        birdY += birdVelocity;
-        ctx.fillStyle = "yellow";
-        ctx.fillRect(50, birdY, birdSize, birdSize);
-
-        // Draw Column
-        columnX -= 2; // Column speed
-        if (columnX < -columnWidth) {
-          columnX = canvas.width;
-          columnHeight = Math.floor(Math.random() * (canvas.height - columnGap));
-          score++;
-        }
-        ctx.fillStyle = "green";
-        ctx.fillRect(columnX, 0, columnWidth, columnHeight); // Top column
-        ctx.fillRect(columnX, columnHeight + columnGap, columnWidth, canvas.height); // Bottom column
-
-        // Check for Collision
-        if (birdY < 0 || birdY + birdSize > canvas.height ||
-            (50 < columnX + columnWidth && 50 + birdSize > columnX &&
-            (birdY < columnHeight || birdY + birdSize > columnHeight + columnGap))) {
-          gameOver = true;
-        }
-
-        // Draw Score
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.fillText("Score: " + score, 10, 25);
-
-        // Loop the game
-        requestAnimationFrame(gameLoop);
-      } else {
-        // Game Over Screen
-        ctx.fillStyle = "black";
-        ctx.font = "30px Arial";
-        ctx.fillText("Game Over!", canvas.width / 2 - 70, canvas.height / 2 - 20);
-        ctx.font = "20px Arial";
-        ctx.fillText("Press Space or Tap to Restart", canvas.width / 2 - 130, canvas.height / 2 + 20);
+    // Function for the computer's move
+    function computerMove() {
+      let availableMoves = board.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+      if (availableMoves.length > 0) {
+        const randomIndex = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+        makeMove(randomIndex, computer);
       }
     }
 
-    // Reset Game
+    // Function to check for game over
+    function checkGameOver(symbol) {
+      const status = document.getElementById('status');
+
+      // Check for winner
+      for (let combo of winningCombinations) {
+        const [a, b, c] = combo;
+        if (board[a] === symbol && board[b] === symbol && board[c] === symbol) {
+          isGameOver = true;
+          status.textContent = `${symbol} wins!`;
+          return;
+        }
+      }
+
+      // Check for a draw
+      if (!board.includes(null)) {
+        isGameOver = true;
+        status.textContent = "It's a draw!";
+      }
+    }
+
+    // Reset game for a new round
     function resetGame() {
-      birdY = canvas.height / 2;
-      birdVelocity = 0;
-      columnX = canvas.width;
-      columnHeight = Math.floor(Math.random() * (canvas.height - columnGap));
-      score = 0;
-      gameOver = false;
-      gameLoop();
+      board.fill(null);
+      isGameOver = false;
+      document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
+      document.getElementById('status').textContent = "Your turn!";
     }
 
-    // Start Game
-    gameLoop();
+    // Click event to reset game
+    document.getElementById('status').addEventListener('click', resetGame);
   </script>
 </body>
 </html>
