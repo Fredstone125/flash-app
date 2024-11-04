@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe</title>
+  <title>Reaction Time Tester</title>
   <link rel="manifest" href="manifest.json">
   <style>
     body, html {
@@ -17,29 +17,85 @@
     }
     #gameContainer {
       text-align: center;
+      max-width: 400px;
+      width: 100%;
     }
-    #board {
-      display: grid;
-      grid-template-columns: repeat(3, 100px);
-      gap: 5px;
+    #status {
+      font-size: 1.5em;
+      margin-top: 20px;
     }
-    .cell {
-      width: 100px;
-      height: 100px;
-      background-color: #ffffff;
-      border: 2px solid #333;
-      font-size: 2em;
+    #reactionBox {
+      width: 100%;
+      height: 300px;
+      background-color: #333;
+      margin-top: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-    }
-    #status {
-      margin-top: 15px;
+      color: white;
       font-size: 1.2em;
+      cursor: pointer;
     }
   </style>
   <script>
+    let startTime, reactionTime, timeoutID;
+    let waitingForClick = false;
+
+    function startTest() {
+      const reactionBox = document.getElementById('reactionBox');
+      const status = document.getElementById('status');
+
+      // Reset styles and message
+      reactionBox.style.backgroundColor = '#333';
+      reactionBox.textContent = "Wait for Green...";
+      status.textContent = "";
+
+      // Set a random delay to turn the box green
+      const randomDelay = Math.random() * 3000 + 1000; // 1-4 seconds
+      waitingForClick = false;
+
+      timeoutID = setTimeout(() => {
+        reactionBox.style.backgroundColor = 'green';
+        reactionBox.textContent = "Click!";
+        startTime = new Date().getTime(); // Start timer
+        waitingForClick = true;
+      }, randomDelay);
+    }
+
+    function handleClick() {
+      const reactionBox = document.getElementById('reactionBox');
+      const status = document.getElementById('status');
+
+      // If clicked too early
+      if (!waitingForClick) {
+        clearTimeout(timeoutID);
+        reactionBox.style.backgroundColor = 'red';
+        reactionBox.textContent = "Too Soon! Try Again.";
+        status.textContent = "";
+        setTimeout(startTest, 1000); // Restart test after 1 second
+        return;
+      }
+
+      // Calculate reaction time if clicked correctly
+      reactionTime = new Date().getTime() - startTime;
+      reactionBox.textContent = `Your Reaction Time: ${reactionTime} ms`;
+      status.textContent = "Click to try again!";
+      waitingForClick = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const reactionBox = document.getElementById('reactionBox');
+      reactionBox.addEventListener('click', () => {
+        if (waitingForClick || reactionBox.textContent === "Wait for Green...") {
+          handleClick();
+        } else {
+          startTest();
+        }
+      });
+
+      startTest();
+    });
+
     // Register the service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js')
@@ -50,142 +106,9 @@
 </head>
 <body>
   <div id="gameContainer">
-    <h1>Tic Tac Toe</h1>
-    <div id="board">
-      <div class="cell" data-index="0"></div>
-      <div class="cell" data-index="1"></div>
-      <div class="cell" data-index="2"></div>
-      <div class="cell" data-index="3"></div>
-      <div class="cell" data-index="4"></div>
-      <div class="cell" data-index="5"></div>
-      <div class="cell" data-index="6"></div>
-      <div class="cell" data-index="7"></div>
-      <div class="cell" data-index="8"></div>
-    </div>
-    <div id="status">Your turn!</div>
+    <h1>Reaction Time Tester</h1>
+    <div id="reactionBox">Click to Start</div>
+    <div id="status"></div>
   </div>
-
-  <script>
-    const board = Array(9).fill(null); // Game board state
-    let isGameOver = false;
-    const player = 'X';
-    const computer = 'O';
-    
-    const winningCombinations = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-      [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-      [0, 4, 8], [2, 4, 6]             // Diagonals
-    ];
-
-    // Function to handle user move
-    function makeMove(index, symbol) {
-      if (!board[index] && !isGameOver) {
-        board[index] = symbol;
-        document.querySelector(`.cell[data-index="${index}"]`).textContent = symbol;
-        checkGameOver(symbol);
-      }
-    }
-
-    // Handle user click
-    document.querySelectorAll('.cell').forEach(cell => {
-      cell.addEventListener('click', () => {
-        const index = cell.getAttribute('data-index');
-        if (!board[index] && !isGameOver) {
-          makeMove(index, player);
-          if (!isGameOver) computerMove();
-        }
-      });
-    });
-
-    // Minimax algorithm for the computer's move
-    function computerMove() {
-      const bestMove = minimax(board, computer).index;
-      makeMove(bestMove, computer);
-    }
-
-    function minimax(newBoard, currentPlayer) {
-      const emptySpots = newBoard.reduce((acc, val, idx) => val === null ? acc.concat(idx) : acc, []);
-      
-      // Check for terminal states
-      if (checkWin(newBoard, player)) return { score: -10 };
-      if (checkWin(newBoard, computer)) return { score: 10 };
-      if (emptySpots.length === 0) return { score: 0 };
-
-      // Moves array to store possible moves and their scores
-      const moves = [];
-
-      for (let i = 0; i < emptySpots.length; i++) {
-        const move = {};
-        move.index = emptySpots[i];
-        newBoard[emptySpots[i]] = currentPlayer;
-
-        // Recursive call to minimax
-        if (currentPlayer === computer) {
-          move.score = minimax(newBoard, player).score;
-        } else {
-          move.score = minimax(newBoard, computer).score;
-        }
-
-        // Reset the spot after testing
-        newBoard[emptySpots[i]] = null;
-        moves.push(move);
-      }
-
-      // Choose the best move based on current player
-      let bestMove;
-      if (currentPlayer === computer) {
-        let bestScore = -Infinity;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score > bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
-        }
-      } else {
-        let bestScore = Infinity;
-        for (let i = 0; i < moves.length; i++) {
-          if (moves[i].score < bestScore) {
-            bestScore = moves[i].score;
-            bestMove = i;
-          }
-        }
-      }
-      
-      return moves[bestMove];
-    }
-
-    function checkWin(currentBoard, symbol) {
-      return winningCombinations.some(combo => combo.every(index => currentBoard[index] === symbol));
-    }
-
-    // Function to check for game over
-    function checkGameOver(symbol) {
-      const status = document.getElementById('status');
-
-      // Check for winner
-      if (checkWin(board, symbol)) {
-        isGameOver = true;
-        status.textContent = `${symbol} wins!`;
-        return;
-      }
-
-      // Check for a draw
-      if (!board.includes(null)) {
-        isGameOver = true;
-        status.textContent = "It's a draw!";
-      }
-    }
-
-    // Reset game for a new round
-    function resetGame() {
-      board.fill(null);
-      isGameOver = false;
-      document.querySelectorAll('.cell').forEach(cell => cell.textContent = '');
-      document.getElementById('status').textContent = "Your turn!";
-    }
-
-    // Click event to reset game
-    document.getElementById('status').addEventListener('click', resetGame);
-  </script>
 </body>
 </html>
